@@ -3,7 +3,7 @@ import time
 
 
 def go():
-    import namespace_get
+    from . import namespace_get
     a = namespace_get.get_cached_value()
     time.sleep(0.3)
     b = namespace_get.get_cached_value()

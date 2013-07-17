@@ -59,7 +59,7 @@ class _backends(object):
     def __getitem__(self, key):
         try:
             return self._clsmap[key]
-        except KeyError, e:
+        except KeyError as e:
             if not self.initialized:
                 self._mutex.acquire()
                 try:
@@ -95,7 +95,10 @@ class _backends(object):
                     # Warn when there's a problem loading a NamespaceManager
                     if not isinstance(sys.exc_info()[1], DistributionNotFound):
                         import traceback
-                        from StringIO import StringIO
+                        if util.PY2:
+                            from StringIO import StringIO
+                        else:
+                            from io import StringIO
                         tb = StringIO()
                         traceback.print_exc(file=tb)
                         warnings.warn(
@@ -244,7 +247,7 @@ def region_invalidate(namespace, region, *args):
                 region_invalidate(self.load, 'short_term', 'some_data', search_term, limit, offset)
 
     """
-    if callable(namespace):
+    if util.callable(namespace):
         if not region:
             region = namespace._arg_region
         namespace = namespace._arg_namespace
@@ -311,7 +314,7 @@ class Cache(object):
     remove = remove_value
 
     def _get_value(self, key, **kw):
-        if isinstance(key, unicode):
+        if isinstance(key, util.text_type):
             key = key.encode('ascii', 'backslashreplace')
 
         if 'type' in kw:
@@ -550,15 +553,9 @@ def _cache_decorate(deco_args, manager, kwargs, region):
                                     "argument is required")
 
             if skip_self:
-                try:
-                    cache_key = " ".join(map(str, deco_args + args[1:]))
-                except UnicodeEncodeError:
-                    cache_key = " ".join(map(unicode, deco_args + args[1:]))
+                cache_key = " ".join(map(util.text_type, deco_args + args[1:]))
             else:
-                try:
-                    cache_key = " ".join(map(str, deco_args + args))
-                except UnicodeEncodeError:
-                    cache_key = " ".join(map(unicode, deco_args + args))
+                cache_key = " ".join(map(util.text_type, deco_args + args))
             if region:
                 key_length = cache_regions[region]['key_length']
             else:
@@ -580,10 +577,7 @@ def _cache_decorate(deco_args, manager, kwargs, region):
 def _cache_decorator_invalidate(cache, key_length, args):
     """Invalidate a cache key based on function arguments."""
 
-    try:
-        cache_key = " ".join(map(str, args))
-    except UnicodeEncodeError:
-        cache_key = " ".join(map(unicode, args))
+    cache_key = " ".join(map(util.text_type, args))
     if len(cache_key) + len(cache.namespace_name) > key_length:
         cache_key = sha1(cache_key).hexdigest()
     cache.remove_value(cache_key)

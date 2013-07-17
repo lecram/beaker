@@ -17,7 +17,7 @@ def simple_app(environ, start_response):
     domain = environ.get('domain')
     if domain:
         session.domain = domain
-    if not session.has_key('value'):
+    if 'value' not in session:
         session['value'] = 0
     session['value'] += 1
     if not environ['PATH_INFO'].startswith('/nosave'):

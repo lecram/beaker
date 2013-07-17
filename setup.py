@@ -8,14 +8,9 @@ v = open(os.path.join(os.path.dirname(__file__), 'beaker', '__init__.py'))
 VERSION = re.compile(r".*__version__ = '(.*?)'", re.S).match(v.read()).group(1)
 v.close()
 
-extra = {}
 tests_require = ['nose', 'webtest', 'Mock']
 pycryptopp = 'pycryptopp>=0.5.12'
-if sys.version_info >= (3, 0):
-    extra.update(
-        use_2to3=True,
-    )
-else:
+if sys.version_info < (3, 0):
     tests_require.append(pycryptopp)
 
 if not sys.platform.startswith('java') and not sys.platform == 'cli':
@@ -124,5 +119,4 @@ The latest developer version is available in a `github repository
           google = beaker.ext.google:GoogleNamespaceManager
           sqla = beaker.ext.sqla:SqlaNamespaceManager
       """,
-      **extra
 )

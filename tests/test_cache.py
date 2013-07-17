@@ -32,7 +32,7 @@ pRjbXgkAAAAAAFjVyc1Idc6U1lYGgbSmL0Mjpe248+PYjY87I91x/UGeb3udAAAAAACgfh+fAAAA
 AADgr/t5/sPFTZ5cb/38D19Lzn9pRHX/zR4CtEZ/o+nfiEX9N3kI0Gr9vWl/W0z0BwAAAAAAAAAA
 AAAAAAAAqPAFyOvcKA==
 """
-if util.py3k:
+if not util.PY2:
     dbm_cache_tar = dbm_cache_tar.encode('ascii')
 dbm_cache_tar = zlib.decompress(base64.b64decode(dbm_cache_tar))
 
@@ -45,7 +45,7 @@ kudGVrKgushNkYuVc5VM/Rups5vjY3wErJU6nD+Z7fyFNFpEjIf4AFeef7Jq22TOZnzOpLiJLz0d
 CGyE+q/scHyMk/Wv+E79G0L9hzC7JSFMpv0PN0+J4rv7xNk+iTuKh07E6aXnB9Mao/7X/fExzt//
 FecS9R8C9v/r9rP+l49tubnk+e/z/J8JjvMfAAAAAAAAAADAn70DFJAAwQ==
 """
-if util.py3k:
+if not util.PY2:
     dumbdbm_cache_tar = dumbdbm_cache_tar.encode('ascii')
 dumbdbm_cache_tar = zlib.decompress(base64.b64decode(dumbdbm_cache_tar))
 
@@ -84,36 +84,34 @@ def test_has_key():
     cache = Cache('test', data_dir='./cache', type='dbm')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
-    assert not cache.has_key("foo")
     assert "foo" not in cache
     cache.remove_value("test")
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_expire_changes():
     cache = Cache('test_bar', data_dir='./cache', type='dbm')
     cache.set_value('test', 10)
-    assert cache.has_key('test')
+    assert 'test' in cache
     assert cache['test'] == 10
 
     # ensure that we can change a never-expiring value
     cache.set_value('test', 20, expiretime=1)
-    assert cache.has_key('test')
+    assert 'test' in cache
     assert cache['test'] == 20
     time.sleep(1)
-    assert not cache.has_key('test')
+    assert 'test' not in cache
 
     # test that we can change it before its expired
     cache.set_value('test', 30, expiretime=50)
-    assert cache.has_key('test')
+    assert 'test' in cache
     assert cache['test'] == 30
 
     cache.set_value('test', 40, expiretime=3)
-    assert cache.has_key('test')
+    assert 'test' in cache
     assert cache['test'] == 40
     time.sleep(3)
-    assert not cache.has_key('test')
+    assert 'test' not in cache
 
 def test_fresh_createfunc():
     cache = Cache('test_foo', data_dir='./cache', type='dbm')
@@ -130,7 +128,7 @@ def test_fresh_createfunc():
     assert x == 16
 
     cache.remove_value('test')
-    assert not cache.has_key('test')
+    assert 'test' not in cache
     x = cache.get_value('test', createfunc=lambda: 20, expiretime=2)
     assert x == 20
 
@@ -138,10 +136,9 @@ def test_has_key_multicache():
     cache = Cache('test', data_dir='./cache', type='dbm')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
     cache = Cache('test', data_dir='./cache', type='dbm')
-    assert cache.has_key("test")
+    assert "test" in cache
 
 def test_unicode_keys():
     cache = Cache('test', data_dir='./cache', type='dbm')
@@ -283,11 +280,6 @@ def test_upgrade():
                 test(os.path.join(dir, 'db'))
             finally:
                 shutil.rmtree(dir)
-
-def _test_upgrade_has_key(dir):
-    cache = Cache('test', data_dir=dir, type='dbm')
-    assert cache.has_key('foo')
-    assert cache.has_key('foo')
 
 def _test_upgrade_in(dir):
     cache = Cache('test', data_dir=dir, type='dbm')

@@ -56,30 +56,27 @@ def test_has_key():
     cache = Cache('test', data_dir='./cache', url=db_url, type='ext:database')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
-    assert not cache.has_key("foo")
     assert "foo" not in cache
     cache.remove_value("test")
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_has_key_multicache():
     cache = Cache('test', data_dir='./cache', url=db_url, type='ext:database')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
     cache = Cache('test', data_dir='./cache', url=db_url, type='ext:database')
-    assert cache.has_key("test")
+    assert "test" in cache
     cache.remove_value('test')
 
 def test_clear():
     cache = Cache('test', data_dir='./cache', url=db_url, type='ext:database')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
+    assert "test" in cache
     cache.clear()
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_unicode_keys():
     cache = Cache('test', data_dir='./cache', url=db_url, type='ext:database')

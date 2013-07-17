@@ -67,30 +67,27 @@ def test_has_key():
     cache = make_cache()
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
-    assert not cache.has_key("foo")
     assert "foo" not in cache
     cache.remove_value("test")
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_has_key_multicache():
     cache = make_cache()
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
     cache = make_cache()
-    assert cache.has_key("test")
+    assert "test" in cache
     cache.remove_value('test')
 
 def test_clear():
     cache = make_cache()
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
+    assert "test" in cache
     cache.clear()
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_unicode_keys():
     cache = make_cache()

@@ -44,7 +44,7 @@ def simple_session_app(environ, start_response):
         if not session:
             start_response('200 OK', [('Content-type', 'text/plain')])
             return ["No session id of %s found." % sess_id]
-        if not session.has_key('value'):
+        if 'value' not in session:
             session['value'] = 0
         session['value'] += 1
         if not environ['PATH_INFO'].startswith('/nosave'):
@@ -131,29 +131,26 @@ def test_has_key():
     cache = Cache('test', data_dir='./cache', url=mc_url, type='ext:memcached')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
-    assert not cache.has_key("foo")
     assert "foo" not in cache
     cache.remove_value("test")
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_dropping_keys():
     cache = Cache('test', data_dir='./cache', url=mc_url, type='ext:memcached')
     cache.set_value('test', 20)
     cache.set_value('fred', 10)
-    assert cache.has_key('test')
     assert 'test' in cache
-    assert cache.has_key('fred')
+    assert 'fred' in cache
 
     # Directly nuke the actual key, to simulate it being removed by memcached
     cache.namespace.mc.delete('test_test')
-    assert not cache.has_key('test')
-    assert cache.has_key('fred')
+    assert 'test' not in cache
+    assert 'fred' in cache
 
     # Nuke the keys dict, it might die, who knows
     cache.namespace.mc.delete('test:keys')
-    assert cache.has_key('fred')
+    assert 'fred' in cache
 
     # And we still need clear to work, even if it won't work well
     cache.clear()
@@ -165,21 +162,20 @@ def test_deleting_keys():
     # Nuke the keys dict, it might die, who knows
     cache.namespace.mc.delete('test:keys')
 
-    assert cache.has_key('test')
+    assert 'test' in cache
 
     # make sure we can still delete keys even though our keys dict got nuked
     del cache['test']
 
-    assert not cache.has_key('test')
+    assert 'test' not in cache
 
 def test_has_key_multicache():
     cache = Cache('test', data_dir='./cache', url=mc_url, type='ext:memcached')
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
     cache = Cache('test', data_dir='./cache', url=mc_url, type='ext:memcached')
-    assert cache.has_key("test")
+    assert "test" in cache
 
 def test_unicode_keys():
     cache = Cache('test', data_dir='./cache', url=mc_url, type='ext:memcached')
@@ -202,10 +198,10 @@ def test_spaces_in_unicode_keys():
 def test_spaces_in_keys():
     cache = Cache('test', data_dir='./cache', url=mc_url, type='ext:memcached')
     cache.set_value("has space", 24)
-    assert cache.has_key("has space")
+    assert "has space" in cache
     assert 24 == cache.get_value("has space")
     cache.set_value("hasspace", 42)
-    assert cache.has_key("hasspace")
+    assert "hasspace" in cache
     assert 42 == cache.get_value("hasspace")
 
 @util.skip_if(lambda: TestApp is None, "webtest not installed")
@@ -283,12 +279,10 @@ class TestPylibmcInit(unittest.TestCase):
                       protocol='binary')
         o = object()
         cache.set_value("test", o)
-        assert cache.has_key("test")
         assert "test" in cache
-        assert not cache.has_key("foo")
         assert "foo" not in cache
         cache.remove_value("test")
-        assert not cache.has_key("test")
+        assert "test" not in cache
 
     def test_client_behaviors(self):
         config = {

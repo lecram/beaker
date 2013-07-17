@@ -1,4 +1,3 @@
-import Cookie
 import os
 from datetime import datetime, timedelta
 import time
@@ -7,7 +6,11 @@ from beaker import crypto, util
 from beaker.cache import clsmap
 from beaker.exceptions import BeakerException, InvalidCryptoBackendError
 from base64 import b64encode, b64decode
-
+import beaker.util as util
+if util.PY2:
+    import Cookie as cookies
+else:
+    import http.cookies as cookies
 
 __all__ = ['SignedCookie', 'Session']
 
@@ -32,21 +35,21 @@ except ImportError:
                     random.random(),
                     getpid()
                 )
-        if util.py3k:
+        if util.PY2:
+            return md5(md5(id_str).hexdigest()).hexdigest()
+        else:
             return md5(
                             md5(
                                 id_str.encode('ascii')
                             ).hexdigest().encode('ascii')
                         ).hexdigest()
-        else:
-            return md5(md5(id_str).hexdigest()).hexdigest()
 
 
-class SignedCookie(Cookie.BaseCookie):
+class SignedCookie(cookies.BaseCookie):
     """Extends python cookie to give digital signature support"""
     def __init__(self, secret, input=None):
         self.secret = secret.encode('UTF-8')
-        Cookie.BaseCookie.__init__(self, input)
+        cookies.BaseCookie.__init__(self, input)
 
     def value_decode(self, val):
         val = val.strip('"')
@@ -145,10 +148,10 @@ class Session(dict):
             if secret:
                 try:
                     self.cookie = SignedCookie(secret, input=cookieheader)
-                except Cookie.CookieError:
+                except cookies.CookieError:
                     self.cookie = SignedCookie(secret, input=None)
             else:
-                self.cookie = Cookie.SimpleCookie(input=cookieheader)
+                self.cookie = cookies.SimpleCookie(input=cookieheader)
 
             if not self.id and self.key in self.cookie:
                 self.id = self.cookie[self.key].value
@@ -160,7 +163,7 @@ class Session(dict):
         else:
             try:
                 self.load()
-            except Exception, e:
+            except Exception as e:
                 if invalidate_corrupt:
                     util.warn(
                         "Invalidating corrupt session %s; "
@@ -213,7 +216,7 @@ class Session(dict):
         try:
             if self.httponly:
                 self.cookie[self.key]['httponly'] = True
-        except Cookie.CookieError, e:
+        except cookies.CookieError as e:
             if 'Invalid Attribute httponly' not in str(e):
                 raise
             util.warn('Python 2.6+ is required to use httponly')
@@ -520,7 +523,7 @@ class CookieSession(Session):
 
         try:
             self.cookie = SignedCookie(validate_key, input=cookieheader)
-        except Cookie.CookieError:
+        except cookies.CookieError:
             self.cookie = SignedCookie(validate_key, input=None)
 
         self['_id'] = _session_id()

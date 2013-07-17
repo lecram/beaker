@@ -1,4 +1,8 @@
-import cPickle
+import beaker.util as util
+if util.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 import logging
 from datetime import datetime
 
@@ -67,8 +71,8 @@ class GoogleNamespaceManager(OpenResourceNamespaceManager):
         else:
             self._is_new = False
             try:
-                self.hash = cPickle.loads(str(item.data))
-            except (IOError, OSError, EOFError, cPickle.PickleError):
+                self.hash = pickle.loads(str(item.data))
+            except (IOError, OSError, EOFError, pickle.PickleError):
                 if self.log_debug:
                     log.debug("Couln't load pickle data, creating new storage")
                 self.hash = {}
@@ -80,14 +84,14 @@ class GoogleNamespaceManager(OpenResourceNamespaceManager):
         if self.flags is not None and (self.flags == 'c' or self.flags == 'w'):
             if self._is_new:
                 item = self.cache(key_name=self.namespace)
-                item.data = cPickle.dumps(self.hash)
+                item.data = pickle.dumps(self.hash)
                 item.created = datetime.now()
                 item.accessed = datetime.now()
                 item.put()
                 self._is_new = False
             else:
                 item = self.cache.get_by_key_name(self.namespace)
-                item.data = cPickle.dumps(self.hash)
+                item.data = pickle.dumps(self.hash)
                 item.accessed = datetime.now()
                 item.put()
         self.flags = None
@@ -114,7 +118,7 @@ class GoogleNamespaceManager(OpenResourceNamespaceManager):
         del self.hash[key]
 
     def keys(self):
-        return self.hash.keys()
+        return list(self.hash.keys())
 
 
 class GoogleContainer(Container):

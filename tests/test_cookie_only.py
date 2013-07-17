@@ -17,7 +17,7 @@ if not crypto.has_aes:
 
 def simple_app(environ, start_response):
     session = environ['beaker.session']
-    if not session.has_key('value'):
+    if 'value' not in session:
         session['value'] = 0
     session['value'] += 1
     if not environ['PATH_INFO'].startswith('/nosave'):
