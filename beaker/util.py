@@ -1,11 +1,10 @@
 """Beaker utilities"""
 
 try:
-    import thread as _thread
     import threading as _threading
 except ImportError:
-    import dummy_thread as _thread
     import dummy_threading as _threading
+
 
 from datetime import datetime, timedelta
 import os
@@ -23,12 +22,14 @@ jython = sys.platform.startswith('java')
 
 if py3k or jython:
     import pickle
+    import _thread
 else:
+    import thread as _thread
     import cPickle as pickle
 
 from beaker.converters import asbool
 from beaker import exceptions
-from threading import local as _tlocal
+_tlocal = _threading.local
 
 
 __all__ = ["ThreadLocal", "WeakValuedRegistry", "SyncDict", "encoded_path",
