@@ -141,7 +141,7 @@ class Session(dict):
         if util.PY2:
             self.validate_key = validate_key
         else:
-            self.validate_key = validate_key.encode("utf8")
+            self.validate_key = validate_key and validate_key.encode("utf8")
         self.id = id
         self.accessed_dict = {}
         self.invalidate_corrupt = invalidate_corrupt
