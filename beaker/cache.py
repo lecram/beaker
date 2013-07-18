@@ -553,9 +553,11 @@ def _cache_decorate(deco_args, manager, kwargs, region):
                                     "argument is required")
 
             if skip_self:
-                cache_key = " ".join(map(util.text_type, deco_args + args[1:]))
+                allargs = deco_args + args[1:]
             else:
-                cache_key = " ".join(map(util.text_type, deco_args + args))
+                allargs = deco_args + args
+            cache_key = " ".join(map(util.text_type, allargs))
+            cache_key = cache_key.encode("utf8")
             if region:
                 key_length = cache_regions[region]['key_length']
             else:
@@ -578,6 +580,7 @@ def _cache_decorator_invalidate(cache, key_length, args):
     """Invalidate a cache key based on function arguments."""
 
     cache_key = " ".join(map(util.text_type, args))
+    cache_key = cache_key.encode("utf8")
     if len(cache_key) + len(cache.namespace_name) > key_length:
         cache_key = sha1(cache_key).hexdigest()
     cache.remove_value(cache_key)
