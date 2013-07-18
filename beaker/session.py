@@ -138,7 +138,10 @@ class Session(dict):
         self.secure = secure
         self.httponly = httponly
         self.encrypt_key = encrypt_key
-        self.validate_key = validate_key
+        if util.PY2:
+            self.validate_key = validate_key
+        else:
+            self.validate_key = validate_key.encode("utf8")
         self.id = id
         self.accessed_dict = {}
         self.invalidate_corrupt = invalidate_corrupt
