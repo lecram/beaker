@@ -596,6 +596,8 @@ class DBMNamespaceManager(OpenResourceNamespaceManager):
         return pickle.loads(self.dbm[key])
 
     def __contains__(self, key):
+        if not isinstance(key, util.bytes_type):
+            key = key.encode('utf8')
         return key in self.dbm
 
     def __setitem__(self, key, value):
