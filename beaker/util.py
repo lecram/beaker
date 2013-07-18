@@ -456,7 +456,7 @@ def parse_cache_config_options(config, include_defaults=True):
                                   key_length=options.get('key_length', 250))
             region_prefix = '%s.' % region
             region_len = len(region_prefix)
-            for key in options.keys():
+            for key in list(options.keys()):
                 if key.startswith(region_prefix):
                     region_options[key[region_len:]] = options.pop(key)
             coerce_cache_params(region_options)
