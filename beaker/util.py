@@ -482,12 +482,10 @@ def parse_memcached_behaviors(config):
 def func_namespace(func):
     """Generates a unique namespace for a function"""
     kls = None
-    if hasattr(func, 'im_func'):
-        kls = func.im_class
-        func = func.im_func
-    else:
-        kls = func.__self__.__class__
+    if hasattr(func, '__func__'):
+        kls = func.__class__
         func = func.__func__
+
 
     if kls:
         return '%s.%s' % (kls.__module__, kls.__name__)
